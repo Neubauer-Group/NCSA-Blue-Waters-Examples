@@ -49,3 +49,32 @@ qsub: waiting for job 12345689.bw to start
 ```
 
 and when it returns (which can take some time) the user will be on a MOM node.
+Once the job starts, load the `shifter` module
+
+```
+module load shifter
+```
+
+to start using the `shifter` and `shifterimg` commands.
+
+```
+aprun -b -N 1 -cc none -- shifter --image=python:3.6.8 -- /bin/bash
+```
+
+It seems that getting the correct Docker base images can be tricky given
+
+> when you prepare a Docker image for your application, make sure to use a base image that provides `glibc` that supports the version of Linux kernel installed on Blue Waters, which is version `3.0.101`.
+> This requirement is tricky to check automatically because it depends on the version of `glibc` and --enable-kernel flag used at the time `glibc` is compiled.
+> If `glibc` provided by the operating system in the image does not support the version of Linux kernel installed on Blue Waters, consider using a different base image.
+
+and it is seen that the official Python Docker images are not compliant
+
+```
+$ shifterimg pull python:3.8
+$ aprun -b -N 1 -cc none -- shifter --image=python:3.8 --entrypoint=/bin/bash
+mount: warning: ufs seems to be mounted read-only.
+mount: warning: dsl/opt seems to be mounted read-only.
+FATAL: kernel too old
+Application 96757362 exit codes: 127
+Application 96757362 resources: utime ~0s, stime ~1s, Rss ~22900, inblocks ~40955, outblocks ~38774
+```
