@@ -35,8 +35,17 @@ Note: A [Machine Oriented Mini-server](https://linux.die.net/man/8/pbs_mom) (MOM
 
 **Example: Running the `pyhf:latest` Docker image**
 
-From the Blue Waters login node start an interactive job on a single node with 32 processes per node (ppn) on an XE node for a maximum of 1 hour
+From the Blue Waters login node start an interactive Shifter job on a single node with 32 processes per node (ppn) on an XE node for a maximum of 1 hour
 
 ```
-qsub -I -l nodes=1:ppn=32:xe -l walltime=01:00:00
+qsub -I -l gres=shifter -l nodes=1:ppn=32:xe -l walltime=01:00:00
 ```
+
+The job will then be queued up
+
+```
+INFO: Job submitted to account: abcd
+qsub: waiting for job 12345689.bw to start
+```
+
+and when it returns (which can take some time) the user will be on a MOM node.
