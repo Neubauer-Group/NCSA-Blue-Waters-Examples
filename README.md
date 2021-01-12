@@ -4,7 +4,7 @@ Examples of running basic jobs on NCSA's Blue Waters
 
 ## Running a Job with Shifter
 
-Most of this will follow the [NCSA Blue Waters docuementation on Shifter](https://bluewaters.ncsa.illinois.edu/shifter), but it will addiitonally give some further information and asides to get new users up to speed.
+Most of this will follow the [NCSA Blue Waters documentation on Shifter](https://bluewaters.ncsa.illinois.edu/shifter), but it will additionally give some further information and asides to get new users up to speed.
 
 > On Blue Waters, Shifter is provided as a module called `shifter`.
 > Unlike other modules, it can only be loaded on a [MOM node](https://bluewaters.ncsa.illinois.edu/interactive-jobs) in a Shifter job, which is a job that requests `shifter` generic resource.
