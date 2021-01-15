@@ -88,6 +88,7 @@ Written by Roland McGrath and Ulrich Drepper.
 but the `centos:7` image CAN be used
 
 ```
+$ shifterimg pull centos:7
 $ docker run --rm centos:7 /bin/bash -c "ldd --version"
 ldd (GNU libc) 2.17
 Copyright (C) 2012 Free Software Foundation, Inc.
