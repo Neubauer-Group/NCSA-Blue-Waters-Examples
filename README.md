@@ -33,9 +33,9 @@ Most of this will follow the [NCSA Blue Waters documentation on Shifter](https:/
 
 Note: A [Machine Oriented Mini-server](https://linux.die.net/man/8/pbs_mom) (MOM) node is a shared service resource that manages job execution, and on Blue Waters is accessed through starting an [interactive session](https://bluewaters.ncsa.illinois.edu/interactive-jobs).
 
-**Example: Running the `pyhf:latest` Docker image**
+**Example: Running a Docker image**
 
-From the Blue Waters login node start an interactive Shifter job on a single node with 32 processes per node (ppn) on an XE node for a maximum of 1 hour
+From the Blue Waters login node start an interactive Shifter job on a single node with 32 processes per node (ppn) on an XE node (**N.B.** XK is required for GPUs) for a maximum of 1 hour
 
 ```
 qsub -I -l gres=shifter -l nodes=1:ppn=32:xe -l walltime=01:00:00
@@ -58,16 +58,45 @@ module load shifter
 to start using the `shifter` and `shifterimg` commands.
 
 ```
-aprun -b -N 1 -cc none -- shifter --image=python:3.6.8 -- /bin/bash
+aprun -b -N 1 -- shifter --image=centos:7 -- /bin/bash -i
 ```
 
-It seems that getting the correct Docker base images can be tricky given
+**N.B.:** If you don't include the interactive flag `-i` `shifter` will run the image with no prompt, so you will have to guess when execution finishes in the interactive session.
+
+Finding Docker images that can work with Blue Waters can be a bit tricky given
 
 > when you prepare a Docker image for your application, make sure to use a base image that provides `glibc` that supports the version of Linux kernel installed on Blue Waters, which is version `3.0.101`.
 > This requirement is tricky to check automatically because it depends on the version of `glibc` and --enable-kernel flag used at the time `glibc` is compiled.
 > If `glibc` provided by the operating system in the image does not support the version of Linux kernel installed on Blue Waters, consider using a different base image.
 
-and it is seen that the official Python Docker images are not compliant
+From a NCSA help ticket, it was revealed that distributions with **`glibc` `v2.23` or older can be made compatible** with the Linux kernel on Blue Waters (`v3.0.101`), whereas `glibc` `v2.24` or newer **can not**.
+So before you try to use a Docker image on Blue Waters check it locally.
+
+**Examples:**
+
+The `python:3.8` image can NOT be used
+
+```
+$ docker run --rm python:3.8 /bin/bash -c "ldd --version"
+ldd (Debian GLIBC 2.28-10) 2.28
+Copyright (C) 2018 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+```
+
+but the `centos:7` image CAN be used
+
+```
+$ docker run --rm centos:7 /bin/bash -c "ldd --version"
+ldd (GNU libc) 2.17
+Copyright (C) 2012 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+Written by Roland McGrath and Ulrich Drepper.
+```
+
+If you tried to run an incompatible Docker image on Blue Waters you'd get a kernel fatal error like the following
 
 ```
 $ shifterimg pull python:3.8
@@ -77,4 +106,48 @@ mount: warning: dsl/opt seems to be mounted read-only.
 FATAL: kernel too old
 Application 96757362 exit codes: 127
 Application 96757362 resources: utime ~0s, stime ~1s, Rss ~22900, inblocks ~40955, outblocks ~38774
+```
+
+### Running a shifter job with GPUs
+
+Running on a GPU with shifter requires using the XK nodes
+
+```
+qsub -I -l gres=shifter -l nodes=1:ppn=8:xk -l walltime=01:00:00
+```
+
+and then loading both the `shifter` and `nvidia` modules
+
+```
+module load shifter
+module load craype-accel-nvidia35
+```
+
+then the NVIDIA drivers and CUDA libraries can be picked up
+
+```
+aprun -b -N 1 -- shifter --image=centos:7 -- /bin/bash -c "nvidia-smi && nvcc --version"
+mount: warning: ufs seems to be mounted read-only.
+mount: warning: dsl/opt seems to be mounted read-only.
+Thu Jan 14 23:28:33 2021
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 390.46                 Driver Version: 390.46                    |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|===============================+======================+======================|
+|   0  Tesla K20X          On   | 00000000:02:00.0 Off |                    0 |
+| N/A   32C    P8    17W / 225W |      0MiB /  5700MiB |      0%   E. Process |
++-------------------------------+----------------------+----------------------+
+
++-----------------------------------------------------------------------------+
+| Processes:                                                       GPU Memory |
+|  GPU       PID   Type   Process name                             Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+nvcc: NVIDIA (R) Cuda compiler driver
+Copyright (c) 2005-2017 NVIDIA Corporation
+Built on Fri_Nov__3_21:07:56_CDT_2017
+Cuda compilation tools, release 9.1, V9.1.85
 ```
