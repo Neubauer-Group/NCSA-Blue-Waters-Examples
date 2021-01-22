@@ -69,8 +69,10 @@ Finding Docker images that can work with Blue Waters can be a bit tricky given
 > This requirement is tricky to check automatically because it depends on the version of `glibc` and --enable-kernel flag used at the time `glibc` is compiled.
 > If `glibc` provided by the operating system in the image does not support the version of Linux kernel installed on Blue Waters, consider using a different base image.
 
-From a NCSA help ticket, it was revealed that distributions with **`glibc` `v2.23` or older can be made compatible** with the Linux kernel on Blue Waters (`v3.0.101`), whereas `glibc` `v2.24` or newer **can not**.
+From a NCSA [help ticket](https://jira.ncsa.illinois.edu/browse/BWAPPS-6807), it was revealed that distributions with **`glibc` `v2.23` or older can be made compatible** with the Linux kernel on Blue Waters (`v3.0.101`), whereas `glibc` `v2.24` or newer **can not**.
 So before you try to use a Docker image on Blue Waters check it locally.
+
+---
 
 **Examples:**
 
@@ -108,6 +110,8 @@ FATAL: kernel too old
 Application 96757362 exit codes: 127
 Application 96757362 resources: utime ~0s, stime ~1s, Rss ~22900, inblocks ~40955, outblocks ~38774
 ```
+
+---
 
 ### Running a shifter job with GPUs
 
@@ -152,3 +156,13 @@ Copyright (c) 2005-2017 NVIDIA Corporation
 Built on Fri_Nov__3_21:07:56_CDT_2017
 Cuda compilation tools, release 9.1, V9.1.85
 ```
+
+Note that given that Blue Waters has CUDA 9 installed, and CUDA 10 will not be installed given that Blue Waters is entering end-of-life operations, modern machine learning frameworks like JAX, PyTorch (`v1.X`), and TensorFlow (`v2.X`) can not use the GPUs.
+
+Blue Waters does have the [Blue Waters Python software stack (`bwpy`)](https://bluewaters.ncsa.illinois.edu/python), which can be loaded with
+
+```
+module load bwpy/<version you want here> # example bwpy/2.0.4
+```
+
+which includes PyTorch and TensorFlow, but quite old releases (`torch` `v0.X` and `tensorflow` `v1.X`) that are compatible with CUDA v9 only.
