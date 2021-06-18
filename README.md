@@ -166,3 +166,12 @@ module load bwpy/<version you want here> # example bwpy/2.0.4
 ```
 
 which includes PyTorch and TensorFlow, but quite old releases (`torch` `v0.X` and `tensorflow` `v1.X`) that are compatible with CUDA v9 only.
+
+
+## Running Batch Jobs
+
+As noted in the Blue Waters [Getting Started Guide section on batch jobs](https://bluewaters.ncsa.illinois.edu/getting-started/#Running), the Blue Waters batch environment is Torque/MOAB and the `aprun` utility is used to start jobs on compute nodes.
+
+### Hello World example
+
+The following is a "Hello World" example of executing a job with `aprun` in a [Portable Batch System](https://en.wikipedia.org/wiki/Portable_Batch_System) (PBS) batch script submitted to run with `qsub`.
