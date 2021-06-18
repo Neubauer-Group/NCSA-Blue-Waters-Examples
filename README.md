@@ -177,7 +177,7 @@ The following is a "Hello World" example of executing a job with `aprun` in a [P
 
 ```console
 $ mkdir /scratch/sciteam/${USER}/hello_world_example
-printf '#!/bin/bash\n\necho "hello hello world ${1}"\n' > /scratch/sciteam/${USER}/hello_world_example/hello_world.sh
+printf '#!/bin/bash\n\necho "hello hello world ${1}"\necho ""\n' > /scratch/sciteam/${USER}/hello_world_example/hello_world.sh
 ```
 
 ```console
@@ -209,10 +209,6 @@ $ cat hello_world.pbs
 # [uncomment the following line to enable this]
 # cd "${PBS_O_WORKDIR}"
 
-
-cd "${PBS_O_WORKDIR}"
-echo "${PBS_O_WORKDIR}"
-
 # Alternatively, the job script can create its own job-ID-unique directory
 # to run within.  In that case you'll need to create and populate that
 # directory with executables and perhaps inputs
@@ -223,13 +219,13 @@ echo "${PBS_O_WORKDIR}"
 
 mkdir -p "/scratch/sciteam/${USER}/${PBS_JOBID}"
 cd "/scratch/sciteam/${USER}/${PBS_JOBID}"
-cp "/scratch/sciteam/${USER}/hello_world_example/*" .
+cp /scratch/sciteam/"${USER}"/hello_world_example/* .
 
 aprun \
   --bypass-app-transfer \
   --pes-per-node 1 \
   --cpu-binding none \
-  /bin/bash hello_world.sh "${USER}" > "out.${PBS_JOBID}"
+  /bin/bash hello_world.sh "${USER}" >> "out.${PBS_JOBID}"
 ```
 
 ```
