@@ -167,7 +167,6 @@ module load bwpy/<version you want here> # example bwpy/2.0.4
 
 which includes PyTorch and TensorFlow, but quite old releases (`torch` `v0.X` and `tensorflow` `v1.X`) that are compatible with CUDA v9 only.
 
-
 ## Running Batch Jobs
 
 As noted in the Blue Waters [Getting Started Guide section on batch jobs](https://bluewaters.ncsa.illinois.edu/getting-started/#Running), the Blue Waters batch environment is Torque/MOAB and the `aprun` utility is used to start jobs on compute nodes.
@@ -175,3 +174,64 @@ As noted in the Blue Waters [Getting Started Guide section on batch jobs](https:
 ### Hello World example
 
 The following is a "Hello World" example of executing a job with `aprun` in a [Portable Batch System](https://en.wikipedia.org/wiki/Portable_Batch_System) (PBS) batch script submitted to run with `qsub`.
+
+```console
+$ mkdir /scratch/sciteam/${USER}/hello_world_example
+printf '#!/bin/bash\n\necho "hello hello world ${1}"\n' > /scratch/sciteam/${USER}/hello_world_example/hello_world.sh
+```
+
+```console
+$ cat hello_world.pbs
+```
+```bash
+#!/bin/bash
+
+# Set the number of processing elements (PEs) or cores
+# Set the number of PEs per node
+#PBS -l nodes=1:ppn=8:xk
+
+# Set the wallclock time
+#PBS -l walltime=00:30:00
+
+# Set the job name
+#PBS -N testjob
+
+# Set the job stdout and stderr
+#PBS -e "${PBS_JOBID.err}"
+#PBS -o "${PBS_JOBID.out}"
+
+# Set email notification on termination or abort
+#PBS -m ea
+#PBS -M username@host
+
+# If you launched the job in a directory prepared for the job to run within,
+# you'll want to cd to that directory
+# [uncomment the following line to enable this]
+# cd "${PBS_O_WORKDIR}"
+
+
+cd "${PBS_O_WORKDIR}"
+echo "${PBS_O_WORKDIR}"
+
+# Alternatively, the job script can create its own job-ID-unique directory
+# to run within.  In that case you'll need to create and populate that
+# directory with executables and perhaps inputs
+# [uncomment and customize the following lines to enable this behavior]
+# mkdir -p "/scratch/sciteam/${USER}/${PBS_JOBID}"
+# cd "/scratch/sciteam/${USER}/${PBS_JOBID}"
+# cp "/scratch/sciteam/${USER}/hello_world_example/*" .
+
+mkdir -p "/scratch/sciteam/${USER}/${PBS_JOBID}"
+cd "/scratch/sciteam/${USER}/${PBS_JOBID}"
+cp "/scratch/sciteam/${USER}/hello_world_example/*" .
+
+aprun \
+  --bypass-app-transfer \
+  --pes-per-node 1 \
+  --cpu-binding none \
+  /bin/bash hello_world.sh "${USER}" > "out.${PBS_JOBID}"
+```
+
+```
+$ qsub hello_world.pbs
+```
