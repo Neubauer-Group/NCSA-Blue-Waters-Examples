@@ -197,8 +197,8 @@ $ cat hello_world.pbs
 #PBS -N testjob
 
 # Set the job stdout and stderr
-#PBS -e "${PBS_JOBID.err}"
-#PBS -o "${PBS_JOBID.out}"
+#PBS -e "/scratch/sciteam/${USER}/${PBS_JOBID}/${PBS_JOBID.err}"
+#PBS -o "/scratch/sciteam/${USER}/${PBS_JOBID}/${PBS_JOBID.out}"
 
 # Set email notification on termination or abort
 #PBS -m ea
