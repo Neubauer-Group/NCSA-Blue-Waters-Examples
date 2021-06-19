@@ -11,12 +11,15 @@
 #PBS -N testjob
 
 # Set the job stdout and stderr
-#PBS -e "/scratch/sciteam/${USER}/${PBS_JOBID}/${PBS_JOBID.err}"
-#PBS -o "/scratch/sciteam/${USER}/${PBS_JOBID}/${PBS_JOBID.out}"
+#PBS -e "${PBS_JOBNAME}.${PBS_JOBID}.err"
+#PBS -o "${PBS_JOBNAME}.${PBS_JOBID}.out"
 
 # Set email notification on termination or abort
 #PBS -m ea
 #PBS -M username@host
+
+# Set allocation to charge
+#PBS -A xyz
 
 # If you launched the job in a directory prepared for the job to run within,
 # you'll want to cd to that directory
